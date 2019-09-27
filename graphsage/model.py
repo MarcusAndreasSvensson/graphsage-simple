@@ -25,7 +25,7 @@ class SupervisedGraphSage(nn.Module):
         self.xent = nn.CrossEntropyLoss()
 
         self.weight = nn.Parameter(torch.FloatTensor(num_classes, enc.embed_dim))
-        init.xavier_uniform(self.weight)
+        init.xavier_uniform_(self.weight)
 
     def forward(self, nodes):
         embeds = self.enc(nodes)
@@ -46,7 +46,7 @@ def load_cora():
     with open("cora/cora.content") as fp:
         for i,line in enumerate(fp):
             info = line.strip().split()
-            feat_data[i,:] = map(float, info[1:-1])
+            feat_data[i,:] = [x for x in map(float, info[1:-1])]
             node_map[info[0]] = i
             if not info[-1] in label_map:
                 label_map[info[-1]] = len(label_map)
@@ -99,7 +99,7 @@ def run_cora():
         optimizer.step()
         end_time = time.time()
         times.append(end_time-start_time)
-        print(batch, loss.data[0])
+        print(batch, loss.item())
 
     val_output = graphsage.forward(val) 
     print("Validation F1:", f1_score(labels[val], val_output.data.numpy().argmax(axis=1), average="micro"))
